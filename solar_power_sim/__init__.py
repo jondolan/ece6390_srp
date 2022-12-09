@@ -1,0 +1,1 @@
+from .solar_power import solar_power_efficiency
