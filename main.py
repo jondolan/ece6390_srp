@@ -14,11 +14,13 @@ from controllers import *
 class Earth:
     mu                  = 398600.4415                   # km^3/s^2
     sidereal_day        = 86164.0905                    # sidereal day in seconds
-    omega               = 2.0*pi / sidereal_day    # earth rotation rate, rad/sec
+    omega               = 2.0*pi / sidereal_day         # earth rotation rate, rad/sec
     
 
 class Sun:
     p                   = 4.560e-6                      # solar radiation pressure at 1AU (N/m^2)
+    sidereal_year       = Earth.sidereal_day*365.256    # sidereal year
+    omega               = 2.0*pi / sidereal_year        # earth rotation about sun, rad/sec 
 
 ## SATELLITE
 class Satellite:
@@ -34,7 +36,7 @@ class Satellite:
     area_density_comm   = 5.0                           # mass to area ratio for comm antenna, kg/m^2
 
 class Parameters:
-    days                = 7                            # days to run the sim
+    days                = 30                            # days to run the sim
     sidereal_day        = Earth.sidereal_day
     samples             = 8000                          # number of samples of the orbit to take
     plot                = True
@@ -69,7 +71,7 @@ generation      = zeros(num_thetas)
 #     print(f"{thetas[i]} deg: {generation[i]}")
 
 
-Satellite.controller    = static_incidence
+Satellite.controller    = sinusoidal_off_90
 Satellite.incidence     = radians(0.0)
 generation = run(    
     earth=Earth,

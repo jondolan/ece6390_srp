@@ -20,7 +20,7 @@ def controller(r, v, t, parameters, satellite):
     # change2  = parameters.sidereal_day*55
 
     range   = parameters.sidereal_day*8
-    cutoff  = parameters.sidereal_day*7.35
+    cutoff  = parameters.sidereal_day*6
 
     # if t < change:
     #     cutoff  = parameters.sidereal_day*3.75

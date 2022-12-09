@@ -2,6 +2,8 @@ from math import atan2, sin, cos, pi
 from numpy import zeros, concatenate, array, sqrt, where
 from scipy.integrate import solve_ivp
 
+from .sun import sun_angle
+
 thetas = []
 
 # def control(t, y, ts, earth, sun, satellite, controller):
@@ -93,8 +95,11 @@ def two_body_with_srp(t, y, parameters, earth, sun, satellite):
     # two body propagation
     two_body        = (-mu/r_norm**3) * r
 
-    # Montenbruck and Gill
+
     # TODO: account for sun direction
+    print(sun_angle( t, sun))
+
+        # Montenbruck and Gill
     solar_srp_direction = array(
         [   (1-e_solar) * cos(incidence_command) + 2 * e_solar * cos(incidence_command)**2, \
             2 * e_solar * sin(incidence_command) * cos(incidence_command), \
@@ -108,6 +113,9 @@ def two_body_with_srp(t, y, parameters, earth, sun, satellite):
         comm_angle = abs(orbit_theta)-pi
     else:
         comm_angle = orbit_theta
+
+    # correct for sun rotation
+
 
     comm_srp_direction = array(
         [   (1-e_comm) * cos(comm_angle) + 2 * e_comm * cos(comm_angle)**2, \
