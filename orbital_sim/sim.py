@@ -10,8 +10,21 @@ from .latlong           import r_to_latlong
 from solar_power_sim    import solar_power_efficiency
 from comm_sim           import transmission_efficiency
 
-def run(earth, sun, satellite, parameters):
+def run(earth, sun, satellite, parameters, output=None):
     # print(controller(0, 0, 0, 0, math.radians(90.0)))
+
+    # tests = linspace(-0.15, 0.15, 100)
+    # results = zeros(100)
+    # for i in range(0,len(tests)):
+    #     results[i] = transmission_efficiency(tests[i], None, None, satellite)
+    
+    # plt.plot(tests, results)
+    # plt.title(f"Comms transmission efficiency pattern")
+    # plt.ylabel("Transmission efficiency (%)")
+    # plt.xlabel("Theta drift (deg)")
+    # plt.savefig("/run/output/gain.png")
+    # plt.close()
+
     
     ts                          = linspace(0, parameters.days*satellite.period, parameters.samples)
     parameters.dt               = ts[1]-ts[0]
@@ -26,6 +39,7 @@ def run(earth, sun, satellite, parameters):
 
     # initial condition
     satellite.incidence             = satellite.controller(r0, v0, ts[0], parameters, satellite)
+    # print(satellite.incidence)
 
     rs, _, thetas  = propagate(r0, v0, ts, parameters, earth, sun, satellite)
 
@@ -51,32 +65,69 @@ def run(earth, sun, satellite, parameters):
     total_power     = energy * (parameters.days*24) # kW
     prefect_total   = (satellite.peak_power / 1000) * (parameters.days*24) #kW
 
-    if parameters.plot:
+    if output:
         # plot results!
         days    = ts/earth.sidereal_day
 
         fig = plt.figure()
-        fig.suptitle(f"{parameters.days} days, total={round(total_power,3)}kW, {round(energy,3)}kWh, {round((total_power/prefect_total)*100,1)}% of max", y=0.95)
-        fig.set_size_inches(10, 10)
+        fig.suptitle(f"{parameters.days} days, total={round(total_power,3)}kW, {round(energy,3)}kWh, {round((total_power/prefect_total)*100,1)}% of max")
+        fig.set_size_inches(10, 4)
         plt.subplots_adjust(wspace=0.4, hspace=0.6)
 
-        ax = fig.add_subplot(321)
-        ax.set_title("Perifocal orbital diagram")
-        ax.set_ylabel("y position (km)")
-        ax.set_xlabel("x position (km)")
-        ax.set_aspect('equal', adjustable='box')
-        ax.plot(rs[:,0], rs[:,1])
-        ax.plot(0,0,'b+')
-        ax.plot(rs[:,0][0], rs[:,1][0],'g+')
-        ax.plot(rs[:,0][-1], rs[:,1][-1],'r+')
+        # ax = fig.add_subplot(321)
+        # ax.set_title("Perifocal orbital diagram")
+        # ax.set_ylabel("y position (km)")
+        # ax.set_xlabel("x position (km)")
+        # ax.set_aspect('equal', adjustable='box')
+        # ax.plot(rs[:,0], rs[:,1])
+        # ax.plot(0,0,'b+')
+        # ax.plot(rs[:,0][0], rs[:,1][0],'g+')
+        # ax.plot(rs[:,0][-1], rs[:,1][-1],'r+')
 
-        ax = fig.add_subplot(322)
+        # ax = fig.add_subplot(322)
+        # ax.set_title("Controller")
+        # ax.set_ylabel("Solar incidence angle (deg)")
+        # ax.set_xlabel("Elapsed time (days)")
+        # ax.set_ylim([-90, 90])
+        # ax.plot(days, [degrees(x) for x in thetas])
+
+        # ax = fig.add_subplot(323)
+        # ax.set_title("SSP longitude")
+        # ax.set_ylabel("Longitude (deg)")
+        # ax.set_xlabel("Elapsed time (days)")
+        # ax.axhline(degrees(satellite.max_long_drift), color='red')
+        # ax.axhline(degrees(-satellite.max_long_drift), color='red')
+        # ax.plot(days, longs)
+
+        # ax = fig.add_subplot(324)
+        # ax.set_title("Ground station power receipt (no FSPL)")
+        # ax.set_ylabel("Power (W)")
+        # ax.set_xlabel("Elapsed time (days)")
+        # # ax.set_ylim([-0.05,1.05])
+        # ax.plot(days, power)
+
+        # ax = fig.add_subplot(325)
+        # ax.set_title("Solar power generation")
+        # ax.set_ylabel("Efficiency (%)")
+        # ax.set_xlabel("Elapsed time (days)")
+        # ax.set_ylim([-0.05,1.05])
+        # ax.plot(days, generation_factor)
+
+        # ax = fig.add_subplot(326)
+        # ax.set_title("Comm transmission")
+        # ax.set_ylabel("Efficiency (%)")
+        # ax.set_xlabel("Elapsed time (days)")
+        # ax.set_ylim([-0.05,1.05])
+        # ax.plot(days, transmission_factor)
+
+        ax = fig.add_subplot(121)
         ax.set_title("Controller")
         ax.set_ylabel("Solar incidence angle (deg)")
         ax.set_xlabel("Elapsed time (days)")
+        ax.set_ylim([-90, 90])
         ax.plot(days, [degrees(x) for x in thetas])
 
-        ax = fig.add_subplot(323)
+        ax = fig.add_subplot(122)
         ax.set_title("SSP longitude")
         ax.set_ylabel("Longitude (deg)")
         ax.set_xlabel("Elapsed time (days)")
@@ -84,28 +135,7 @@ def run(earth, sun, satellite, parameters):
         ax.axhline(degrees(-satellite.max_long_drift), color='red')
         ax.plot(days, longs)
 
-        ax = fig.add_subplot(324)
-        ax.set_title("Ground station power receipt (no FSPL)")
-        ax.set_ylabel("Power (W)")
-        ax.set_xlabel("Elapsed time (days)")
-        # ax.set_ylim([-0.05,1.05])
-        ax.plot(days, power)
-
-        ax = fig.add_subplot(325)
-        ax.set_title("Satellite solar power generation")
-        ax.set_ylabel("Efficiency (%)")
-        ax.set_xlabel("Elapsed time (days)")
-        ax.set_ylim([-0.05,1.05])
-        ax.plot(days, generation_factor)
-
-        ax = fig.add_subplot(326)
-        ax.set_title("Satellite comm transmission")
-        ax.set_ylabel("Efficiency (%)")
-        ax.set_xlabel("Elapsed time (days)")
-        ax.set_ylim([-0.05,1.05])
-        ax.plot(days, transmission_factor)
-
-        fig.savefig(f"/run/output/output.png")
+        fig.savefig(output)
         plt.close()
 
         # plt.plot(ts/earth.sidereal_day, longs)

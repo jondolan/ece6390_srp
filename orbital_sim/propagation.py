@@ -6,28 +6,12 @@ from .sun import sun_angle
 
 thetas = []
 
-# def control(t, y, ts, earth, sun, satellite, controller):
-#     global thetas
-#     # preform controller update
-#     r                           = y[:3]
-#     v                           = y[3:]
-#     new_theta                   = controller(r, v, t, satellite)
-#     # TODO: moving sun, calculate power efficiency here
-#     satellite.incidence_angle   = new_theta
-#     i                           = where(ts==t)
-#     print(t)
-#     print(ts[-2])
-#     print(ts[-2]==t)
-#     print(i[0])
-#     thetas[i[0]]                   = new_theta
-#     # print(t)
-#     return 1.0
-
 def propagate(r0, v0, ts, parameters, earth, sun, satellite):
     global thetas
 
     rs          = zeros((len(ts),3))
     vs          = zeros((len(ts),3))
+    thetas      = []
 
     y0      = concatenate((r0, v0))
 
@@ -35,7 +19,6 @@ def propagate(r0, v0, ts, parameters, earth, sun, satellite):
     #                 args=(earth, sun, satellite, controller),
     #                 rtol=1e-13,
     #                 atol=1e-13)
-
     # Nx6 array
     # for i in range(0, len(res)):
     #     rs[i] = res[i][:3]
@@ -51,8 +34,6 @@ def propagate(r0, v0, ts, parameters, earth, sun, satellite):
                     atol=1e-10,
                     rtol=1e-10)
 
-    # print(res)
-
     # 6xN array
     ys = res.y
     for i in range(0, len(ts)):
@@ -62,17 +43,11 @@ def propagate(r0, v0, ts, parameters, earth, sun, satellite):
     # prop = ode(two_body_with_srp,
     #             args=(earth, sun, satellite, controller))
     # prop.set_initial_value(y0)
-
     # for i in range(0, ts):
     #     res = prop.integrate(ts[i])
     #     print(res)
 
     return (rs, vs, thetas)
-
-# def event():
-#     if time % 4:
-#         switch controllers
-
 
 def two_body_with_srp(t, y, parameters, earth, sun, satellite):
     global thetas
@@ -97,7 +72,8 @@ def two_body_with_srp(t, y, parameters, earth, sun, satellite):
 
 
     # TODO: account for sun direction
-    print(sun_angle( t, sun))
+    # print(sun_angle( t, sun))
+    
 
         # Montenbruck and Gill
     solar_srp_direction = array(

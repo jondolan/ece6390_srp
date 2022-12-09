@@ -38,52 +38,191 @@ class Satellite:
 class Parameters:
     days                = 30                            # days to run the sim
     sidereal_day        = Earth.sidereal_day
-    samples             = 8000                          # number of samples of the orbit to take
-    plot                = True
-
-class MonteCarlo:
-    theta_resolution    = 1.0                           # resolution for theta recordings, deg
-    theta_range         = [-90, 90]                     # range for theta, [min, max] deg
+    samples             = 5000                          # number of samples of the orbit to take
 
 
-# SETUP SIM
+# # INCIDENCE 0
+# Satellite.controller    = static_incidence
+# Satellite.incidence     = radians(0.0)
+# test = run(    
+#     earth=Earth,
+#     sun=Sun,
+#     satellite=Satellite,
+#     parameters=Parameters,
+#     output="/run/output/static_0.png"
+# )
 
-## generate theta list
-t_min           = MonteCarlo.theta_range[0]
-t_max           = MonteCarlo.theta_range[1]
-num_thetas      = ceil((t_max-t_min)/MonteCarlo.theta_resolution)+1
-thetas          = linspace(t_min, t_max, num_thetas)
-# print(thetas)
+# # INCIDENCE 45
+# Satellite.controller    = static_incidence
+# Satellite.incidence     = radians(60.0)
+# test = run(    
+#     earth=Earth,
+#     sun=Sun,
+#     satellite=Satellite,
+#     parameters=Parameters,
+#     output="/run/output/static_60.png"
+# )
 
-## pregenerate power generation and transmission efficiency arrays
-generation      = zeros(num_thetas)
+# # INCIDENCE -45
+# Satellite.controller    = static_incidence
+# Satellite.incidence     = radians(-60.0)
+# test = run(    
+#     earth=Earth,
+#     sun=Sun,
+#     satellite=Satellite,
+#     parameters=Parameters,
+#     output="/run/output/static_neg60.png"
+# )
 
-# for each solar incidence angle
+# # AREA DENSITY COMPARISON
+# num_thetas      = 181
+# thetas          = linspace(-90, 90, num_thetas)
+
+# # 5
+# generation      = zeros(num_thetas)
 # for i in range(0,num_thetas):
-#     Satellite.initial_incidence = radians(thetas[i])
+#     Satellite.controller            = static_incidence
+#     Satellite.incidence             = radians(thetas[i])
+#     Satellite.area_density_comm     = 5
+#     Satellite.area_density_solar    = 5
+
 #     generation[i] = run(    
 #         earth=Earth,
 #         sun=Sun,
 #         satellite=Satellite,
 #         parameters=Parameters,
-#         controller=static_incidence
 #     )
-#     print(f"{thetas[i]} deg: {generation[i]}")
+# plt.plot(thetas, generation)
+# plt.title(f"static_incidence controller at area density 5, peak at {round(thetas[argmax(generation)],2)} deg")
+# plt.xlim([-90,90])
+# plt.gca().set_ylim(bottom=0.0)
+# plt.ylabel("Power generation (W)")
+# plt.xlabel("static_incidence controller alpha")
+# plt.savefig("/run/output/area_density_5.png")
+# plt.close()
+
+# # 1
+# generation      = zeros(num_thetas)
+# for i in range(0,num_thetas):
+#     Satellite.controller            = static_incidence
+#     Satellite.incidence             = radians(thetas[i])
+#     Parameters.plot                 = False
+#     Satellite.area_density_comm     = 1
+#     Satellite.area_density_solar    = 1
+
+#     generation[i] = run(    
+#         earth=Earth,
+#         sun=Sun,
+#         satellite=Satellite,
+#         parameters=Parameters,
+#     )
+# plt.plot(thetas, generation)
+# plt.title(f"static_incidence controller at area density 1, peak at {round(thetas[argmax(generation)],2)} deg")
+# plt.xlim([-90,90])
+# plt.gca().set_ylim(bottom=0.0)
+# plt.ylabel("Power generation (W)")
+# plt.xlabel("static_incidence controller alpha")
+# plt.savefig("/run/output/area_density_1.png")
+# plt.close()
+
+# # 0.1
+# generation      = zeros(num_thetas)
+# for i in range(0,num_thetas):
+#     Satellite.controller            = static_incidence
+#     Satellite.incidence             = radians(thetas[i])
+#     Parameters.plot                 = False
+#     Satellite.area_density_comm     = 0.1
+#     Satellite.area_density_solar    = 0.1
+#     generation[i] = run(    
+#         earth=Earth,
+#         sun=Sun,
+#         satellite=Satellite,
+#         parameters=Parameters,
+#     )
+# plt.plot(thetas, generation)
+# plt.title(f"static_incidence controller at area density 0.1, peak at {round(thetas[argmax(generation)],2)} deg")
+# plt.xlim([-90,90])
+# plt.gca().set_ylim(bottom=0.0)
+# plt.ylabel("Power generation (W)")
+# plt.xlabel("static_incidence controller alpha")
+# plt.savefig("/run/output/area_density_0.1.png")
+# plt.close()
 
 
-Satellite.controller    = sinusoidal_off_90
-Satellite.incidence     = radians(0.0)
-generation = run(    
+# # SINUSOIDAL
+# Satellite.controller    = sinusoidal_incidence
+# test = run(    
+#     earth=Earth,
+#     sun=Sun,
+#     satellite=Satellite,
+#     parameters=Parameters,
+#     output="/run/output/sinusoidal.png"
+# )
+
+
+
+# # SINUSOIDAL_OFF_90
+# Satellite.controller    = sinusoidal_off_90
+# test = run(    
+#     earth=Earth,
+#     sun=Sun,
+#     satellite=Satellite,
+#     parameters=Parameters,
+#     output="/run/output/off90.png"
+# )
+
+# # NEG OFF 90
+# Satellite.controller    = negative_sinusoidal_off_90
+# test = run(    
+#     earth=Earth,
+#     sun=Sun,
+#     satellite=Satellite,
+#     parameters=Parameters,
+#     output="/run/output/negoff90.png"
+# )
+
+
+# OPTIMAL CUTOFF FINDING
+# num_thetas      = 91
+# thetas          = linspace(0, 90, num_thetas)
+# generation      = zeros(num_thetas)
+# for i in range(0,num_thetas):
+#     Satellite.controller            = clipped_sinusoidal_off_90
+#     Satellite.clip                  = radians(thetas[i])
+#     generation[i] = run(    
+#         earth=Earth,
+#         sun=Sun,
+#         satellite=Satellite,
+#         parameters=Parameters,
+#     )
+# plt.plot(thetas, generation)
+# plt.title(f"Varying cutoff angles, max generation at {round(thetas[argmax(generation)],2)} deg")
+# plt.xlim([0,90])
+# plt.gca().set_ylim(bottom=0.0)
+# plt.ylabel("Power generation (W)")
+# plt.xlabel("clipped_sinusoidal_off_90 controller angle")
+# plt.savefig("/run/output/optimal_cutoff.png")
+# plt.close()
+
+# # OPTIMAL CUTOFF
+# Satellite.controller            = clipped_sinusoidal_off_90
+# Satellite.clip                  = radians(8.0)
+# test = run(    
+#     earth=Earth,
+#     sun=Sun,
+#     satellite=Satellite,
+#     parameters=Parameters,
+#     output="/run/output/cutoff_authority.png"
+# )
+
+# SMART CUTOFF
+Satellite.controller            = smart_controller
+Satellite.clip                  = radians(8.0)
+Parameters.days                 = 60
+test = run(    
     earth=Earth,
     sun=Sun,
     satellite=Satellite,
     parameters=Parameters,
+    output="/run/output/smart.png"
 )
-print(generation)
-
-# plt.plot(thetas, generation)
-# plt.title(f"Max power generation at theta={round(thetas[argmax(generation)],2)} deg")
-# plt.xlim([t_min,t_max])
-# plt.gca().set_ylim(bottom=0.0)
-# plt.savefig("/run/output/curve.png")
-# plt.close()
